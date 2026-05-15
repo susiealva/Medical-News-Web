@@ -3,13 +3,11 @@
 
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
-import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { ChatBubbleLeftRightIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 const APP_NAME = "Chatbot";
 
 
-export default function Home() {
-  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: "bot", content: "¡Hola! ¿En qué puedo ayudarte hoy?" }
   ]);
@@ -18,8 +16,8 @@ export default function Home() {
   const chatEndRef = useRef(null);
 
   useEffect(() => {
-    if (open) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, open]);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -62,64 +60,53 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Floating button toggler
-  const Toggler = () => (
-    <button
-      className="fixed z-50 bottom-8 right-8 h-14 w-14 rounded-full bg-blue-600 flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
-      onClick={() => setOpen((v) => !v)}
-      aria-label={open ? "Cerrar chatbot" : "Abrir chatbot"}
-    >
-      {open ? <XMarkIcon className="w-8 h-8 text-white" /> : <ChatBubbleLeftRightIcon className="w-8 h-8 text-white" />}
-    </button>
-  );
-
   return (
     <>
       <Head>
         <title>{APP_NAME} - UI</title>
       </Head>
-      <Toggler />
-      {/* Chatbot box */}
-      <div className={`fixed z-40 bottom-28 right-8 w-[370px] max-w-[95vw] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transition-all duration-300 ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}`} style={{minHeight:'520px', maxHeight:'80vh'}}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-blue-600 rounded-t-2xl">
-          <h2 className="text-white text-lg font-semibold tracking-tight">{APP_NAME}</h2>
-          <button onClick={() => setOpen(false)} aria-label="Cerrar" className="ml-2"><XMarkIcon className="w-6 h-6 text-white" /></button>
+      {/* Chatbot box centrado */}
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/10">
+        <div className="w-[370px] max-w-[95vw] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col" style={{minHeight:'520px', maxHeight:'80vh'}}>
+          {/* Header */}
+          <div className="flex items-center justify-center px-6 py-4 bg-blue-600 rounded-t-2xl">
+            <h2 className="text-white text-lg font-semibold tracking-tight">{APP_NAME}</h2>
+          </div>
+          {/* Chat body */}
+          <ul className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#f6f6f6]" style={{minHeight:'320px'}}>
+            {messages.map((msg, idx) => (
+              <li key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end`}>
+                {msg.role === 'bot' && (
+                  <span className="flex items-center justify-center w-8 h-8 rounded bg-blue-600 text-white mr-2"><ChatBubbleLeftRightIcon className="w-5 h-5" /></span>
+                )}
+                <p className={`max-w-[75%] px-4 py-2 rounded-xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-2xl' : 'bg-[#f2f2f2] text-gray-900 rounded-bl-2xl'}`} style={{wordBreak:'break-word'}} dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+              </li>
+            ))}
+            <div ref={chatEndRef} />
+          </ul>
+          {/* Input */}
+          <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-white rounded-b-2xl">
+            <textarea
+              className="flex-1 resize-none border-none outline-none bg-transparent text-base text-gray-900 placeholder-gray-400 py-2 px-0 min-h-[36px] max-h-32"
+              placeholder="Escribe un mensaje..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              rows={1}
+              disabled={loading}
+              required
+              spellCheck={false}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend(e);
+                }
+              }}
+            />
+            <button type="submit" className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition" disabled={loading || !input.trim()} aria-label="Enviar">
+              <PaperAirplaneIcon className="w-6 h-6 rotate-90" />
+            </button>
+          </form>
         </div>
-        {/* Chat body */}
-        <ul className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#f6f6f6]" style={{minHeight:'320px'}}>
-          {messages.map((msg, idx) => (
-            <li key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end`}>
-              {msg.role === 'bot' && (
-                <span className="flex items-center justify-center w-8 h-8 rounded bg-blue-600 text-white mr-2"><ChatBubbleLeftRightIcon className="w-5 h-5" /></span>
-              )}
-              <p className={`max-w-[75%] px-4 py-2 rounded-xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-2xl' : 'bg-[#f2f2f2] text-gray-900 rounded-bl-2xl'}`} style={{wordBreak:'break-word'}} dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
-            </li>
-          ))}
-          <div ref={chatEndRef} />
-        </ul>
-        {/* Input */}
-        <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-white rounded-b-2xl">
-          <textarea
-            className="flex-1 resize-none border-none outline-none bg-transparent text-base text-gray-900 placeholder-gray-400 py-2 px-0 min-h-[36px] max-h-32"
-            placeholder="Escribe un mensaje..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            rows={1}
-            disabled={loading}
-            required
-            spellCheck={false}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend(e);
-              }
-            }}
-          />
-          <button type="submit" className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition" disabled={loading || !input.trim()} aria-label="Enviar">
-            <PaperAirplaneIcon className="w-6 h-6 rotate-90" />
-          </button>
-        </form>
       </div>
     </>
   );
