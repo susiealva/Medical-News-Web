@@ -1,14 +1,13 @@
 
 
 
-
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
 import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 
 const APP_NAME = "MedAI Chat";
 
-
+export default function Home() {
   const [messages, setMessages] = useState([
     { role: "bot", content: "¡Hola! ¿En qué puedo ayudarte hoy?" }
   ]);
@@ -120,4 +119,5 @@ const APP_NAME = "MedAI Chat";
       </div>
     </>
   );
+}
 
