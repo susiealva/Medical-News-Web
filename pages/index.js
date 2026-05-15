@@ -3,46 +3,24 @@
 
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
+import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
-const BOT_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=medbot";
-const USER_AVATAR = "https://api.dicebear.com/7.x/personas/svg?seed=user";
-const LOGO = "https://cdn-icons-png.flaticon.com/512/3774/3774299.png"; // Medical logo
-const APP_NAME = "MedAI News";
+const APP_NAME = "Chatbot";
 
 
 export default function Home() {
-  // Mensajes y estado
-  const [messages, setMessages] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("medai_chat");
-      if (saved) return JSON.parse(saved);
-    }
-    return [
-      { role: "bot", content: "¡Hola! Soy tu agente de noticias médicas. Pregúntame sobre cualquier tema de investigación médica o tecnología aplicada a la medicina." }
-    ];
-  });
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: "bot", content: "¡Hola! ¿En qué puedo ayudarte hoy?" }
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [typing, setTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Guardar historial en localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("medai_chat", JSON.stringify(messages));
-    }
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (open) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, open]);
 
-  // Dark mode automático
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.classList.toggle("dark", dark);
-    }
-  }, []);
-
-  // Enviar mensaje
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -50,7 +28,6 @@ export default function Home() {
     setMessages((msgs) => [...msgs, userMsg]);
     setInput("");
     setLoading(true);
-    setTyping(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const endpoint = apiUrl ? `${apiUrl}/analyze` : "/api/analyze";
@@ -83,49 +60,110 @@ export default function Home() {
       ]);
     }
     setLoading(false);
-    setTyping(false);
   };
 
+  // Floating button toggler
+  const Toggler = () => (
+    <button
+      className="fixed z-50 bottom-8 right-8 h-14 w-14 rounded-full bg-blue-600 flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
+      onClick={() => setOpen((v) => !v)}
+      aria-label={open ? "Cerrar chatbot" : "Abrir chatbot"}
+    >
+      {open ? <XMarkIcon className="w-8 h-8 text-white" /> : <ChatBubbleLeftRightIcon className="w-8 h-8 text-white" />}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen font-sans flex flex-col items-center justify-center bg-gradient-to-br from-[#00c6fb] via-[#f9f9f9] to-[#f9d423] dark:from-[#0a2540] dark:via-[#23272f] dark:to-[#f9d423] transition-colors">
+    <>
+      <Head>
+        <title>{APP_NAME} - UI</title>
+      </Head>
+      <Toggler />
+      {/* Chatbot box */}
+      <div className={`fixed z-40 bottom-28 right-8 w-[370px] max-w-[95vw] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transition-all duration-300 ${open ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-95'}`} style={{minHeight:'520px', maxHeight:'80vh'}}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-blue-600 rounded-t-2xl">
+          <h2 className="text-white text-lg font-semibold tracking-tight">{APP_NAME}</h2>
+          <button onClick={() => setOpen(false)} aria-label="Cerrar" className="ml-2"><XMarkIcon className="w-6 h-6 text-white" /></button>
+        </div>
+        {/* Chat body */}
+        <ul className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#f6f6f6]" style={{minHeight:'320px'}}>
+          {messages.map((msg, idx) => (
+            <li key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end`}>
+              {msg.role === 'bot' && (
+                <span className="flex items-center justify-center w-8 h-8 rounded bg-blue-600 text-white mr-2"><ChatBubbleLeftRightIcon className="w-5 h-5" /></span>
+              )}
+              <p className={`max-w-[75%] px-4 py-2 rounded-xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-2xl' : 'bg-[#f2f2f2] text-gray-900 rounded-bl-2xl'}`} style={{wordBreak:'break-word'}} dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+            </li>
+          ))}
+          <div ref={chatEndRef} />
+        </ul>
+        {/* Input */}
+        <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-white rounded-b-2xl">
+          <textarea
+            className="flex-1 resize-none border-none outline-none bg-transparent text-base text-gray-900 placeholder-gray-400 py-2 px-0 min-h-[36px] max-h-32"
+            placeholder="Escribe un mensaje..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            rows={1}
+            disabled={loading}
+            required
+            spellCheck={false}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(e);
+              }
+            }}
+          />
+          <button type="submit" className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition" disabled={loading || !input.trim()} aria-label="Enviar">
+            <PaperAirplaneIcon className="w-6 h-6 rotate-90" />
+          </button>
+        </form>
+      </div>
+    </>
+  );
+}
+
+  return (
+    <div className="min-h-screen font-sans flex flex-col items-center justify-center bg-[#ececec] dark:bg-[#181c23] transition-colors">
       <Head>
         <title>{APP_NAME} - Chatbot de Noticias Médicas</title>
       </Head>
-      <div className="w-full max-w-md h-[80vh] flex flex-col rounded-2xl shadow-2xl bg-white/95 dark:bg-[#181c23]/95 border border-gray-200 dark:border-gray-700 mt-8 relative">
-        {/* Header personalizado */}
-        <div className="flex items-center gap-3 justify-center py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00c6fb] to-[#f9d423] dark:from-[#0a2540] dark:to-[#f9d423] rounded-t-2xl shadow-sm">
-          <img src={LOGO} alt="Logo" className="w-9 h-9 rounded-full shadow border-2 border-white dark:border-[#23272f] bg-white" />
-          <span className="text-xl font-extrabold text-gray-800 dark:text-yellow-200 tracking-tight drop-shadow">{APP_NAME}</span>
+      <div className="w-full max-w-md h-[80vh] flex flex-col rounded-lg shadow bg-[#f7f7f7] dark:bg-[#23272f] border border-gray-200 dark:border-gray-700 mt-8 relative">
+        {/* Header plano tipo app */}
+        <div className="flex items-center justify-center py-3 bg-[#3b82f6] dark:bg-[#1e293b] rounded-t-lg">
+          <span className="text-lg font-semibold text-white tracking-tight">{APP_NAME}</span>
         </div>
-        {/* Chat body */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 bg-gradient-to-b from-white/90 to-[#f9f9f9] dark:from-[#23272f]/90 dark:to-[#181c23] transition-all">
+        {/* Chat body plano */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2 bg-[#f7f7f7] dark:bg-[#23272f] transition-all">
           {messages.map((msg, idx) => (
             <div
               key={idx}
               className={`flex items-end gap-2 animate-fade-in ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "bot" && (
-                <img src={BOT_AVATAR} alt="Bot" className="w-7 h-7 rounded-full border border-gray-200 dark:border-yellow-300 shadow" />
+                <img src={BOT_AVATAR} alt="Bot" className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 bg-white" />
               )}
               <div
-                className={`max-w-[75%] px-4 py-2 rounded-xl shadow-md whitespace-pre-line text-base leading-relaxed transition-all duration-200
+                className={`max-w-[75%] px-4 py-2 rounded-2xl whitespace-pre-line text-base leading-relaxed transition-all duration-200
                   ${msg.role === "user"
-                    ? "bg-[#00c6fb] text-white rounded-br-2xl border border-blue-200 dark:bg-[#1e90ff] dark:border-blue-400"
-                    : "bg-[#f9d423]/80 text-gray-900 rounded-bl-2xl border border-yellow-100 dark:bg-yellow-300/80 dark:text-[#23272f] dark:border-yellow-400"}
+                    ? "bg-white text-[#1e3a5c] rounded-br-2xl border border-blue-100 dark:bg-[#1e90ff]/10 dark:text-blue-200 dark:border-blue-900"
+                    : "bg-[#e3e3e3] text-gray-800 rounded-bl-2xl border border-gray-200 dark:bg-[#23272f] dark:text-gray-100 dark:border-gray-700"}
                 `}
                 style={{ wordBreak: "break-word" }}
                 dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }}
               />
               {msg.role === "user" && (
-                <img src={USER_AVATAR} alt="Tú" className="w-7 h-7 rounded-full border border-blue-200 dark:border-blue-400 shadow" />
+                <img src={USER_AVATAR} alt="Tú" className="w-6 h-6 rounded-full border border-blue-100 dark:border-blue-900 bg-white" />
               )}
             </div>
           ))}
           {/* Animación escribiendo... */}
           {typing && (
             <div className="flex items-end gap-2 animate-fade-in">
-              <img src={BOT_AVATAR} alt="Bot" className="w-7 h-7 rounded-full border border-gray-200 dark:border-yellow-300 shadow" />
-              <div className="max-w-[75%] px-4 py-2 rounded-xl shadow-md bg-[#f9d423]/80 text-gray-900 border border-yellow-100 dark:bg-yellow-300/80 dark:text-[#23272f] dark:border-yellow-400">
+              <img src={BOT_AVATAR} alt="Bot" className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 bg-white" />
+              <div className="max-w-[75%] px-4 py-2 rounded-2xl bg-[#e3e3e3] text-gray-800 border border-gray-200 dark:bg-[#23272f] dark:text-gray-100 dark:border-gray-700">
                 <span className="typing-dots">
                   <span className="dot">.</span>
                   <span className="dot">.</span>
@@ -137,9 +175,9 @@ export default function Home() {
           <div ref={chatEndRef} />
         </div>
         {/* Input area fixed at bottom */}
-        <form onSubmit={handleSend} className="absolute bottom-0 left-0 w-full flex items-center gap-2 p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#23272f] rounded-b-2xl">
+        <form onSubmit={handleSend} className="absolute bottom-0 left-0 w-full flex items-center gap-2 px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-[#ececec] dark:bg-[#23272f] rounded-b-lg">
           <input
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00c6fb] text-base shadow-sm bg-white dark:bg-[#181c23] dark:text-yellow-100"
+            className="flex-1 border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-base bg-white dark:bg-[#181c23] dark:text-gray-100"
             placeholder="Escribe tu pregunta sobre medicina..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -148,7 +186,7 @@ export default function Home() {
           />
           <button
             type="submit"
-            className="bg-gradient-to-r from-[#00c6fb] to-[#f9d423] text-white px-5 py-2 rounded-full font-semibold shadow-lg hover:from-[#00b5e2] hover:to-[#f7c948] transition disabled:opacity-50 dark:from-[#1e90ff] dark:to-[#f9d423]"
+            className="bg-[#3b82f6] hover:bg-[#2563eb] text-white px-4 py-2 rounded-full font-semibold transition disabled:opacity-50"
             disabled={loading || !input.trim()}
           >
             {loading ? (
@@ -179,7 +217,7 @@ export default function Home() {
           width: 6px;
           height: 6px;
           margin: 0 1px;
-          background: #f9d423;
+          background: #3b82f6;
           border-radius: 50%;
           animation: blink 1.2s infinite both;
         }
@@ -200,4 +238,4 @@ export default function Home() {
       `}</style>
     </div>
   );
-}
+
