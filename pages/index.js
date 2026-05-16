@@ -1,6 +1,10 @@
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
-import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/solid";
 
 const APP_NAME = "MedAI Chat";
 
@@ -40,7 +44,7 @@ function renderMessageContent(message) {
 
 export default function Home() {
   const [messages, setMessages] = useState([
-    { role: "bot", content: "¡Hola! ¿En qué puedo ayudarte hoy?" }
+    { role: "bot", content: "¡Hola! ¿En qué puedo ayudarte hoy?" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,13 +93,13 @@ export default function Home() {
       } else {
         setMessages((msgs) => [
           ...msgs,
-          { role: "bot", content: "No encontré resultados para ese tema." }
+          { role: "bot", content: "No encontré resultados para ese tema." },
         ]);
       }
     } catch (err) {
       setMessages((msgs) => [
         ...msgs,
-        { role: "bot", content: "Ocurrió un error al consultar las noticias." }
+        { role: "bot", content: "Ocurrió un error al consultar las noticias." },
       ]);
     } finally {
       setLoading(false);
@@ -107,18 +111,32 @@ export default function Home() {
       <Head>
         <title>{APP_NAME} - UI</title>
       </Head>
+
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-white flex items-center justify-center py-8 px-2">
-        <div className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden" style={{ minHeight: "600px", maxHeight: "90vh" }}>
+        <div
+          className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden"
+          style={{ minHeight: "600px", maxHeight: "90vh" }}
+        >
           <div className="flex items-center gap-3 px-8 py-6 bg-gradient-to-r from-blue-700 to-indigo-600 rounded-t-3xl shadow-md">
             <span className="flex items-center justify-center w-12 h-12 rounded-full bg-white/20 border-2 border-white shadow-lg">
               <ChatBubbleLeftRightIcon className="w-7 h-7 text-white drop-shadow" />
             </span>
-            <h2 className="text-white text-2xl font-extrabold tracking-tight drop-shadow">{APP_NAME}</h2>
+            <h2 className="text-white text-2xl font-extrabold tracking-tight drop-shadow">
+              {APP_NAME}
+            </h2>
           </div>
 
-          <ul className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-gradient-to-b from-white/80 to-blue-50" style={{ minHeight: "340px" }}>
+          <ul
+            className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-gradient-to-b from-white/80 to-blue-50"
+            style={{ minHeight: "340px" }}
+          >
             {messages.map((msg, idx) => (
-              <li key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} items-end gap-2`}>
+              <li
+                key={idx}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                } items-end gap-2`}
+              >
                 {msg.role === "bot" ? (
                   <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white shadow-lg border-2 border-white">
                     <ChatBubbleLeftRightIcon className="w-6 h-6" />
@@ -144,9 +162,12 @@ export default function Home() {
             <div ref={chatEndRef} />
           </ul>
 
-          <form onSubmit={handleSend} className="flex items-center gap-3 px-6 py-5 border-t border-gray-100 bg-white/80 rounded-b-3xl">
+          <form
+            onSubmit={handleSend}
+            className="flex items-center gap-3 px-6 py-5 border-t border-gray-100 bg-white/80 rounded-b-3xl"
+          >
             <textarea
-              className="flex-1 resize-none border border-blue-200 rounded-full outline-none bg-blue-50 text-base text-gray-900 placeholder-gray-400 py-3 px-5 min-h-[44px] max-h-32 focus:ring-2 focus:ring-blue-200 transition shadow-sm"
+              className="flex-1 resize-none border border-blue-200 rounded-full outline-none bg-blue-50 text-base text-gray-900 placeholder-gray-400 py-3 px-5 min-h-[44px] max-h-32 focus:ring-2 focus:ring-blue-300"
               placeholder="Escribe un mensaje..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
