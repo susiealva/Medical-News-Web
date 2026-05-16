@@ -56,7 +56,7 @@ SYSTEM_PROMPT = (
 )
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-MODEL_GROQ = "llama-3-70b-8192"
+MODEL_GROQ = "openai/gpt-oss-120b"
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")  # Optional: for newsapi.org
 
 groq_client = Groq(api_key=GROQ_API_KEY)
