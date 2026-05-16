@@ -23,7 +23,7 @@ SYSTEM_PROMPT = (
     "síntesis y evaluación de noticias recientes del ámbito médico.\n\n"
     
     "Trabajas con un sistema de recuperación de información (RAG), por lo que siempre recibirás contexto "
-    "desde fuentes externas y hablar en español. Debes basarte estrictamente en esa información y no inventar datos que no estén presentes.\n\n"
+    "desde fuentes externas y hablar en español. Si no hay información nueva o relevante en el contexto, responde con un resumen de los últimos avances conocidos en el área, o con información general actualizada, pero nunca dejes la respuesta vacía.\n\n"
     
     "Tareas principales:\n"
     "1. Analizar las noticias proporcionadas en el contexto.\n"
@@ -102,9 +102,12 @@ async def analyze_news(request: Request):
             })
         return {"results": summaries}
     else:
-        # Si no hay artículos, usa el LLM para responder directamente a la consulta
+        # Si no hay artículos, pide al LLM que dé un resumen de los últimos avances conocidos o información relevante reciente
+        prompt = (
+            f"No se han encontrado noticias recientes en la búsqueda. Por favor, proporciona un resumen breve y actualizado de los últimos avances conocidos en el área consultada, aunque no haya contexto nuevo. Si existe algún hito relevante de los últimos años, menciónalo.\n\nConsulta: {query}"
+        )
         try:
-            answer = llm(query)
+            answer = llm(prompt)
         except Exception as e:
             answer = f"Error al procesar la consulta: {str(e)}"
         return {
