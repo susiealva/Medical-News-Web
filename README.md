@@ -2,7 +2,7 @@
 
 Este proyecto implementa una aplicación web con un chatbot inteligente que:
 - Recupera noticias recientes sobre investigación médica y tecnología aplicada a la medicina usando una API web.
-- Resume cada noticia usando un modelo de lenguaje (LLM, OpenAI GPT).
+- Resume cada noticia usando un modelo de lenguaje (LLM, Groq LLM).
 - Evalúa la relevancia de cada noticia para profesionales de la medicina.
 - Aplica capacidades de RAG (Retrieval-Augmented Generation) para enriquecer los resúmenes con contexto adicional.
 - Visualiza y exporta los resultados, sugiriendo temas emergentes.
@@ -20,7 +20,7 @@ Este proyecto implementa una aplicación web con un chatbot inteligente que:
    pip install -r requirements.txt
    ```
 3. Define las variables de entorno en Render:
-   - `OPENAI_API_KEY` (tu clave de OpenAI)
+   - `GROQ_API_KEY` (tu clave de Groq)
    - `NEWS_API_KEY` (tu clave de NewsAPI)
 4. Despliega en Render.
 
@@ -41,7 +41,7 @@ Este proyecto implementa una aplicación web con un chatbot inteligente que:
 - El agente buscará noticias, las resumirá y evaluará su relevancia usando IA.
 
 ## Créditos
-- OpenAI GPT para resúmenes y análisis.
+- Groq LLM para resúmenes y análisis.
 - NewsAPI para obtención de noticias.
 - FastAPI, Next.js, Tailwind CSS.
 

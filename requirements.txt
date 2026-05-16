@@ -1,4 +1,6 @@
+# Dependencia para LLM
+groq
 fastapi
 uvicorn
 requests
-openai
+
