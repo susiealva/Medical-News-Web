@@ -4,6 +4,7 @@
 ## Medical News Web – Chat para Profesionales Sanitarios
 **MDA25 | IA Generativa Deep Dive LLMs**  
 **MDA2510A | Profesor: Jorge Alcantara**
+
 **Autora: Susana Alvarez**  
 
 ---
