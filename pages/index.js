@@ -1,6 +1,13 @@
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+
+// Estilo para agregar espacio después de cada párrafo
+const markdownComponents = {
+  p: ({ children }) => (
+    <p style={{ marginBottom: "1.2em" }}>{children}</p>
+  ),
+};
 import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
@@ -26,7 +33,7 @@ function renderMessageContent(message) {
         {title ? <div className="font-bold">{title}</div> : null}
         {summary ? (
           <div className="prose prose-blue max-w-none">
-            <ReactMarkdown>{summary}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents}>{summary}</ReactMarkdown>
           </div>
         ) : null}
         {isSafeHttpUrl(url) ? (
@@ -44,7 +51,7 @@ function renderMessageContent(message) {
   }
   return (
     <span className="whitespace-pre-line prose prose-blue max-w-none">
-      <ReactMarkdown>{message.content}</ReactMarkdown>
+      <ReactMarkdown components={markdownComponents}>{message.content}</ReactMarkdown>
     </span>
   );
 }
@@ -135,7 +142,7 @@ export default function Home() {
       </Head>
       {/* Fondo degradado moderno */}
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-white flex items-center justify-center py-8 px-2">
-        <div className="w-full max-w-5xl h-[600px] bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 flex flex-row overflow-hidden" style={{ maxHeight: "90vh" }}>
+        <div className="w-full max-w-7xl h-[80vh] bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 flex flex-row overflow-hidden" style={{ maxHeight: "92vh" }}>
           {/* Sidebar/header a la izquierda */}
           <div className="flex flex-col items-center gap-6 w-72 min-w-[220px] bg-gradient-to-b from-blue-700 to-indigo-600 p-8 text-white">
             <span className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 border-2 border-white shadow-lg">
@@ -160,7 +167,7 @@ export default function Home() {
           </div>
           {/* Chat principal a la derecha */}
           <div className="flex flex-col flex-1 h-full">
-            <ul className="flex-1 overflow-y-auto px-10 py-8 space-y-6 bg-gradient-to-b from-white/80 to-blue-50" style={{ minHeight: "340px" }}>
+            <ul className="flex-1 overflow-y-auto px-16 py-12 space-y-8 bg-gradient-to-b from-white/80 to-blue-50" style={{ minHeight: "480px" }}>
               {messages.map((msg, idx) => (
                 <li key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} items-end gap-2`}>
                   {msg.role === "bot" ? (
@@ -173,7 +180,7 @@ export default function Home() {
                     </span>
                   )}
                   <div
-                    className={`max-w-[70%] px-5 py-3 rounded-2xl text-base font-medium shadow-md transition-all duration-200 ${
+                    className={`max-w-[85%] px-7 py-4 rounded-2xl text-lg font-medium shadow-md transition-all duration-200 ${
                       msg.role === "user"
                         ? "bg-indigo-600 text-white rounded-br-3xl"
                         : "bg-white/90 text-gray-900 rounded-bl-3xl border border-blue-100"
@@ -198,10 +205,10 @@ export default function Home() {
             </ul>
             <form
               onSubmit={handleSend}
-              className="flex items-center gap-3 px-10 py-6 border-t border-gray-100 bg-white/80"
+              className="flex items-center gap-4 px-16 py-8 border-t border-gray-100 bg-white/80"
             >
               <textarea
-                className="flex-1 resize-none border border-blue-200 rounded-full outline-none bg-blue-50 text-base text-gray-900 placeholder-gray-400 py-3 px-5 min-h-[44px] max-h-32 focus:ring-2 focus:ring-blue-300"
+                className="flex-1 resize-none border border-blue-200 rounded-full outline-none bg-blue-50 text-lg text-gray-900 placeholder-gray-400 py-4 px-7 min-h-[56px] max-h-40 focus:ring-2 focus:ring-blue-300"
                 placeholder="Escribe un mensaje..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -218,11 +225,11 @@ export default function Home() {
               />
               <button
                 type="submit"
-                className="p-3 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 hover:from-indigo-500 hover:to-blue-600 text-white disabled:opacity-50 shadow-lg transition"
+                className="p-4 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 hover:from-indigo-500 hover:to-blue-600 text-white disabled:opacity-50 shadow-lg transition"
                 disabled={loading || !input.trim()}
                 aria-label="Enviar"
               >
-                <PaperAirplaneIcon className="w-7 h-7 rotate-90" />
+                <PaperAirplaneIcon className="w-8 h-8" />
               </button>
             </form>
           </div>

@@ -83,7 +83,7 @@ async def analyze_news(request: Request):
         return {
             "results": [
                 {
-                    "title": "Respuesta generada por IA",
+                    "title": "",
                     "url": "",
                     "description": query,
                     "summary": answer
