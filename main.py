@@ -63,6 +63,7 @@ SYSTEM_PROMPT = (
     "## OBJETIVO\n"
     "Actuar como un filtro científico biomédico estricto que elimina ruido informativo y solo conserva conocimiento médico válido."
 )
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL_GROQ = "openai/gpt-oss-120b"
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")  # Optional: for newsapi.org
@@ -89,6 +90,24 @@ def root():
 async def analyze_news(request: Request):
     data = await request.json()
     query = data.get("query", "medical research")
+
+    # Filtro de clasificación médica/no médica
+    query_check = llm(
+        f"Clasifica esta consulta como MEDICA o NO_MEDICA. Responde solo MEDICA o NO_MEDICA.\n\nConsulta: {query}",
+        system="Eres un filtro experto. Solo responde MEDICA o NO_MEDICA."
+    )
+    if "NO_MEDICA" in query_check:
+        return {
+            "results": [
+                {
+                    "title": "Consulta no válida",
+                    "url": "",
+                    "description": query,
+                    "summary": "Este sistema solo responde a consultas médicas o biomédicas."
+                }
+            ]
+        }
+
     news = requests.get(
         "https://newsapi.org/v2/everything",
         params={"q": query, "apiKey": NEWS_API_KEY or "demo"}
