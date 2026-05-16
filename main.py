@@ -90,6 +90,7 @@ def root():
 async def analyze_news(request: Request):
     data = await request.json()
     query = data.get("query", "medical research")
+    history = data.get("history", [])  # Recibe historial de mensajes
 
     # Filtro de clasificación médica/no médica
     query_check = llm(
@@ -116,9 +117,26 @@ async def analyze_news(request: Request):
     summaries = []
     if articles:
         for article in articles:
-            prompt = f"Resume y evalúa la relevancia de esta noticia para profesionales médicos. Recuerda incluir el enlace de la fuente al final.\n\nTítulo: {article.get('title','')}\nDescripción: {article.get('description','')}\nEnlace: {article.get('url','')}"
+            # Construir contexto de historial para el LLM
+            context_msgs = []
+            for m in history[-6:]:  # Solo los últimos 6 mensajes para no saturar
+                if m.get("role") in ("user", "bot"):
+                    context_msgs.append({
+                        "role": "user" if m["role"] == "user" else "assistant",
+                        "content": m.get("content", "")
+                    })
+            # Añadir el mensaje actual
+            context_msgs.append({"role": "user", "content": query})
+            # Llamada al LLM con historial
             try:
-                summary = llm(prompt)
+                resp = groq_client.chat.completions.create(
+                    model=MODEL_GROQ,
+                    messages=[{"role": "system", "content": SYSTEM_PROMPT}] + context_msgs + [
+                        {"role": "user", "content": f"Resume y evalúa la relevancia de esta noticia para profesionales médicos. Recuerda incluir el enlace de la fuente al final.\n\nTítulo: {article.get('title','')}\nDescripción: {article.get('description','')}\nEnlace: {article.get('url','')}"}
+                    ],
+                    temperature=0.5
+                )
+                summary = resp.choices[0].message.content
             except Exception as e:
                 summary = f"Error al resumir: {str(e)}"
             summaries.append({
@@ -130,11 +148,26 @@ async def analyze_news(request: Request):
         return {"results": summaries}
     else:
         # Si no hay artículos, pide al LLM que dé un resumen de los últimos avances conocidos o información relevante reciente
+        context_msgs = []
+        for m in history[-6:]:
+            if m.get("role") in ("user", "bot"):
+                context_msgs.append({
+                    "role": "user" if m["role"] == "user" else "assistant",
+                    "content": m.get("content", "")
+                })
+        context_msgs.append({"role": "user", "content": query})
         prompt = (
             f"No se han encontrado noticias recientes en la búsqueda. Por favor, proporciona un resumen breve y actualizado de los últimos avances conocidos en el área consultada, aunque no haya contexto nuevo. Si existe algún hito relevante de los últimos años, menciónalo.\n\nConsulta: {query}"
         )
         try:
-            answer = llm(prompt)
+            resp = groq_client.chat.completions.create(
+                model=MODEL_GROQ,
+                messages=[{"role": "system", "content": SYSTEM_PROMPT}] + context_msgs + [
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.5
+            )
+            answer = resp.choices[0].message.content
         except Exception as e:
             answer = f"Error al procesar la consulta: {str(e)}"
         return {
