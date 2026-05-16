@@ -1,5 +1,16 @@
 import Head from "next/head";
 import { useState, useRef, useEffect } from "react";
+// Utilidad para alternar la clase 'dark' en <html>
+function setHtmlDarkMode(enabled) {
+  if (typeof window !== 'undefined') {
+    const html = document.documentElement;
+    if (enabled) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+  }
+}
 import ReactMarkdown from "react-markdown";
 
 // Estilo para agregar espacio después de cada párrafo
@@ -57,6 +68,27 @@ function renderMessageContent(message) {
 }
 
 export default function Home() {
+    // Estado para modo oscuro
+    const [darkMode, setDarkMode] = useState(false);
+
+    // Leer preferencia de localStorage al cargar
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('darkMode');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initial = stored === null ? prefersDark : stored === 'true';
+        setDarkMode(initial);
+        setHtmlDarkMode(initial);
+      }
+    }, []);
+
+    // Actualizar <html> y localStorage cuando cambia
+    useEffect(() => {
+      setHtmlDarkMode(darkMode);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('darkMode', darkMode);
+      }
+    }, [darkMode]);
   const promptSuggestions = [
     "¿Qué avances recientes hay en vacunas personalizadas?",
     "Resúmeme noticias sobre inteligencia artificial en medicina.",
@@ -151,6 +183,21 @@ export default function Home() {
         <div className="w-full max-w-7xl h-[80vh] bg-white/90 dark:bg-zinc-900 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 flex flex-row overflow-hidden" style={{ maxHeight: "92vh" }}>
           {/* Sidebar/header a la izquierda */}
           <div className="flex flex-col items-center gap-6 w-72 min-w-[220px] bg-gradient-to-b from-blue-700 to-indigo-600 dark:from-zinc-900 dark:to-zinc-800 p-8 text-white dark:text-zinc-100">
+                        {/* Switch modo oscuro */}
+                        <button
+                          className={`self-end mb-2 flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 dark:border-zinc-700 bg-white/10 dark:bg-zinc-800/60 text-sm font-medium shadow hover:bg-white/20 dark:hover:bg-zinc-700 transition`}
+                          onClick={() => setDarkMode((d) => !d)}
+                          aria-label="Alternar modo oscuro"
+                          type="button"
+                        >
+                          <span>{darkMode ? '🌙 Modo oscuro' : '☀️ Modo claro'}</span>
+                          <span className="w-8 h-4 flex items-center bg-zinc-300 dark:bg-zinc-700 rounded-full p-1 transition">
+                            <span
+                              className={`w-3 h-3 rounded-full bg-blue-600 dark:bg-zinc-100 shadow transform transition ${darkMode ? 'translate-x-4' : ''}`}
+                              style={{ transition: 'transform 0.2s' }}
+                            />
+                          </span>
+                        </button>
             <span className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 dark:bg-zinc-800/60 border-2 border-white dark:border-zinc-700 shadow-lg">
               <ChatBubbleLeftRightIcon className="w-10 h-10 text-white drop-shadow" />
             </span>
