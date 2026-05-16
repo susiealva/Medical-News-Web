@@ -89,13 +89,19 @@ export default function Home() {
     setInput("");
     setLoading(true);
 
+    // Preparar historial para el backend (solo rol y contenido, sin artículos)
+    const history = [...messages, userMsg].map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const endpoint = apiUrl ? `${apiUrl}/analyze` : "/api/analyze";
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: trimmedInput }),
+        body: JSON.stringify({ query: trimmedInput, history }),
       });
 
       if (!res.ok) {

@@ -92,9 +92,19 @@ async def analyze_news(request: Request):
     query = data.get("query", "medical research")
     history = data.get("history", [])  # Recibe historial de mensajes
 
-    # Filtro de clasificación médica/no médica
+
+    # Filtro de clasificación médica/no médica considerando contexto
+    chat_history = "\n".join([
+        f"{m['role']}: {m['content']}" for m in history[-6:] if m.get("role") in ("user", "bot")
+    ])
+    filtro_prompt = (
+        "Si la consulta depende del contexto previo, reinterpreta la intención antes de clasificar. "
+        "Clasifica la siguiente consulta como MEDICA o NO_MEDICA. "
+        "Responde solo MEDICA o NO_MEDICA.\n\n"
+        f"Historial:\n{chat_history}\n\nPregunta:\n{query}"
+    )
     query_check = llm(
-        f"Clasifica esta consulta como MEDICA o NO_MEDICA. Responde solo MEDICA o NO_MEDICA.\n\nConsulta: {query}",
+        filtro_prompt,
         system="Eres un filtro experto. Solo responde MEDICA o NO_MEDICA."
     )
     if "NO_MEDICA" in query_check:
