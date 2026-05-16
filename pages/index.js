@@ -25,23 +25,6 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
 
-// Íconos SVG para luna y sol
-function MoonIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
-    </svg>
-  );
-}
-function SunIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth={2} />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95 7.07l-1.41-1.41M6.34 6.34L4.93 4.93m12.02 0l-1.41 1.41M6.34 17.66l-1.41 1.41" />
-    </svg>
-  );
-}
-
 const APP_NAME = "MedAI Chat";
 
 function isSafeHttpUrl(value) {
@@ -200,45 +183,15 @@ export default function Home() {
         <div className="w-full max-w-7xl h-[80vh] bg-white/90 dark:bg-zinc-900 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 flex flex-row overflow-hidden" style={{ maxHeight: "92vh" }}>
           {/* Sidebar/header a la izquierda */}
           <div className="flex flex-col items-center gap-6 w-72 min-w-[220px] bg-gradient-to-b from-blue-700 to-indigo-600 dark:from-zinc-900 dark:to-zinc-800 p-8 text-white dark:text-zinc-100">
-            {/* Switch modo oscuro con íconos */}
-            <button
-              className={`self-end mb-2 flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 dark:border-zinc-700 bg-white/10 dark:bg-zinc-800/60 text-sm font-medium shadow hover:bg-white/20 dark:hover:bg-zinc-700 transition`}
-              onClick={() => setDarkMode((d) => !d)}
-              aria-label="Alternar modo oscuro"
-              type="button"
-            >
-              {darkMode ? (
-                <>
-                  <SunIcon className="w-5 h-5 text-yellow-300" />
-                  <span>Modo claro</span>
-                </>
-              ) : (
-                <>
-                  <MoonIcon className="w-5 h-5 text-blue-900" />
-                  <span>Modo oscuro</span>
-                </>
-              )}
-              <span className="w-8 h-4 flex items-center bg-zinc-300 dark:bg-zinc-700 rounded-full p-1 transition">
-                <span
-                  className={`w-3 h-3 rounded-full bg-blue-600 dark:bg-zinc-100 shadow transform transition ${darkMode ? 'translate-x-4' : ''}`}
-                  style={{ transition: 'transform 0.2s' }}
-                />
-              </span>
-            </button>
-                        {/* Switch modo oscuro */}
+                        {/* Switch modo claro/oscuro: solo un botón circular con ícono */}
                         <button
-                          className={`self-end mb-2 flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 dark:border-zinc-700 bg-white/10 dark:bg-zinc-800/60 text-sm font-medium shadow hover:bg-white/20 dark:hover:bg-zinc-700 transition`}
+                          className="self-end mb-2 w-10 h-10 flex items-center justify-center rounded-full border border-white/30 dark:border-zinc-700 bg-white/10 dark:bg-zinc-800/60 shadow hover:bg-white/20 dark:hover:bg-zinc-700 transition text-2xl"
                           onClick={() => setDarkMode((d) => !d)}
-                          aria-label="Alternar modo oscuro"
+                          aria-label={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                          title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
                           type="button"
                         >
-                          <span>{darkMode ? '🌙 Modo oscuro' : '☀️ Modo claro'}</span>
-                          <span className="w-8 h-4 flex items-center bg-zinc-300 dark:bg-zinc-700 rounded-full p-1 transition">
-                            <span
-                              className={`w-3 h-3 rounded-full bg-blue-600 dark:bg-zinc-100 shadow transform transition ${darkMode ? 'translate-x-4' : ''}`}
-                              style={{ transition: 'transform 0.2s' }}
-                            />
-                          </span>
+                          {darkMode ? '☀️' : '🌙'}
                         </button>
             <span className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 dark:bg-zinc-800/60 border-2 border-white dark:border-zinc-700 shadow-lg">
               <ChatBubbleLeftRightIcon className="w-10 h-10 text-white drop-shadow" />
